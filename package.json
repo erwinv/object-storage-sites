@@ -9,7 +9,8 @@
     "start": "node build/scripts/main.js",
     "watch:build": "tsc -w",
     "watch:start": "nodemon build/scripts/main.js | pino-pretty",
-    "dev": "concurrently \"npm:watch:*\""
+    "dev": "concurrently \"npm:watch:*\"",
+    "deploy": "rsync -avc ./build/ erwinv.dev:~/object-storage-sites/build/ --delete --progress"
   },
   "keywords": [],
   "author": "",
