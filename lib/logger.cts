@@ -1,6 +1,7 @@
 import type Application from 'koa'
 import { type Middleware } from 'koa'
 import perf_hooks from 'node:perf_hooks'
+import { Readable } from 'node:stream'
 import pino, { type Logger } from 'pino'
 
 declare module 'koa' {
@@ -22,16 +23,29 @@ export function logger(app: Application): Middleware {
     try {
       await next()
       logger.info({
-        res: { ...ctx.response.toJSON(), body: ctx.response.body },
+        res: {
+          ...ctx.response.toJSON(),
+          body: logResponseBody(ctx.response.body),
+        },
         ms: performance.now() - start,
       })
     } catch (e) {
       logger.error({
-        res: { ...ctx.response.toJSON(), body: ctx.response.body },
+        res: {
+          ...ctx.response.toJSON(),
+          body: logResponseBody(ctx.response.body),
+        },
         err: e,
         ms: perf_hooks.performance.now() - start,
       })
       throw e
     }
   }
+}
+
+function logResponseBody(body: unknown) {
+  if (body instanceof Readable) {
+    return '<Stream>'
+  }
+  return body
 }
